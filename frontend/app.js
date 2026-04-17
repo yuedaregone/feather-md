@@ -20,8 +20,8 @@
   function initMarked() {
     const renderer = new marked.Renderer();
 
-    // Custom code block rendering
-    renderer.code = function (code, language) {
+    // Custom code block rendering (marked v15+ uses object parameter)
+    renderer.code = function ({ text: code, lang: language, escaped }) {
       // Handle mermaid diagrams
       if (language === 'mermaid') {
         return '<div class="mermaid">' + escapeHtml(code) + '</div>';
@@ -44,7 +44,7 @@
     };
 
     // Custom image rendering - resolve relative paths via custom protocol
-    renderer.image = function (href, title, text) {
+    renderer.image = function ({ href, title, text }) {
       let src = href;
       // Convert relative paths to feather://app/local/ URLs
       // Rust backend serves local files from the markdown file's directory
