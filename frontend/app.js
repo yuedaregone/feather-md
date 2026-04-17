@@ -162,13 +162,36 @@
   function showContextMenu(e) {
     e.preventDefault();
     const menu = document.getElementById('context-menu');
-    menu.style.left = e.clientX + 'px';
-    menu.style.top = e.clientY + 'px';
+
+    // Make menu visible but hidden to measure its dimensions
+    menu.style.visibility = 'hidden';
     menu.classList.remove('hidden');
+
+    const menuWidth = menu.offsetWidth;
+    const menuHeight = menu.offsetHeight;
+    const windowWidth = window.innerWidth;
+    const windowHeight = window.innerHeight;
+
+    let x = e.clientX;
+    let y = e.clientY;
+
+    // Adjust position if it overflows
+    if ((x + menuWidth) > windowWidth) {
+      x = windowWidth - menuWidth - 5;
+    }
+    if ((y + menuHeight) > windowHeight) {
+      y = windowHeight - menuHeight - 5;
+    }
+
+    menu.style.left = x + 'px';
+    menu.style.top = y + 'px';
+    menu.style.visibility = 'visible';
   }
 
   function hideContextMenu() {
-    document.getElementById('context-menu').classList.add('hidden');
+    const menu = document.getElementById('context-menu');
+    menu.classList.add('hidden');
+    menu.style.visibility = 'hidden';
   }
 
   function handleMenuAction(action, data) {
