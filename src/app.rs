@@ -67,6 +67,17 @@ impl App {
         let webview_builder = WebViewBuilder::new()
             .with_url("feather://app/index.html")
             .with_initialization_script(INIT_SCRIPT)
+            .with_drag_drop_handler({
+                let event_loop_proxy = event_loop_proxy.clone();
+                move |event| {
+                    if let wry::DragDropEvent::Drop { paths, .. } = event {
+                        if let Some(path) = paths.first() {
+                            let _ = event_loop_proxy.send_event(AppEvent::OpenFile(path.clone()));
+                        }
+                    }
+                    true
+                }
+            })
             .with_ipc_handler({
                 let event_loop_proxy = event_loop_proxy.clone();
                 move |request: Request<String>| {
