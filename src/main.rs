@@ -55,13 +55,13 @@ fn main() {
     }
 
     // Resolve file path
-    let file_path = args.file.map(|f| {
-        let path = std::path::PathBuf::from(&f);
-        if path.exists() {
-            path
-        } else {
-            eprintln!("警告: 文件不存在: {}", f);
-            std::path::PathBuf::from(f)
+    let file_path = args.file.and_then(|f| {
+        match std::fs::canonicalize(&f) {
+            Ok(path) => Some(path),
+            Err(_) => {
+                eprintln!("错误: 文件不存在或路径无效: {}", f);
+                None
+            }
         }
     });
 
