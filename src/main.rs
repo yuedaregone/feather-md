@@ -29,7 +29,7 @@ struct Args {
 fn main() {
     let args = Args::parse();
 
-    let mut application = app::App::new();
+    let application = app::App::new();
 
     // Handle register/unregister
     if args.register {

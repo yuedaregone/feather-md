@@ -8,6 +8,8 @@ pub struct WindowState {
     pub height: f64,
     pub x: f64,
     pub y: f64,
+    #[serde(default)]
+    pub is_maximized: bool,
 }
 
 impl Default for WindowState {
@@ -17,6 +19,7 @@ impl Default for WindowState {
             height: 700.0,
             x: 100.0,
             y: 100.0,
+            is_maximized: false,
         }
     }
 }
@@ -24,16 +27,23 @@ impl Default for WindowState {
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Config {
     pub theme: String,
+    #[serde(default = "default_zoom_level")]
+    pub zoom_level: u8,
     pub window: WindowState,
     pub auto_reload: bool,
     #[serde(default)]
     pub file_association_backup: std::collections::HashMap<String, String>,
 }
 
+fn default_zoom_level() -> u8 {
+    2
+}
+
 impl Default for Config {
     fn default() -> Self {
         Self {
             theme: "github-light".to_string(),
+            zoom_level: default_zoom_level(),
             window: WindowState::default(),
             auto_reload: true,
             file_association_backup: std::collections::HashMap::new(),
@@ -70,6 +80,11 @@ impl Config {
 
     pub fn update_theme(&mut self, theme: &str) {
         self.theme = theme.to_string();
+        let _ = self.save();
+    }
+    
+    pub fn update_zoom_level(&mut self, level: u8) {
+        self.zoom_level = level;
         let _ = self.save();
     }
 

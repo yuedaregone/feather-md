@@ -35,7 +35,7 @@ impl App {
         Self { config }
     }
 
-    pub fn run(&mut self, file_path: Option<PathBuf>) {
+    pub fn run(self, file_path: Option<PathBuf>) {
         let event_loop: EventLoop<AppEvent> = EventLoopBuilder::with_user_event().build();
         let event_loop_proxy = event_loop.create_proxy();
 
@@ -45,6 +45,7 @@ impl App {
                 self.config.window.width,
                 self.config.window.height,
             ))
+            .with_maximized(self.config.window.is_maximized)
             .build(&event_loop)
             .expect("Failed to create window");
 
@@ -103,25 +104,28 @@ impl App {
         };
         
         let webview = Arc::new(webview);
-
-        let theme_script = format!(
-            "window.__feather_set_theme({})",
-            serde_json::to_string(&self.config.theme).unwrap()
-        );
-        let _ = webview.evaluate_script(&theme_script);
-
-        if !file_association::is_registered() {
-            if let Ok(exe_path) = std::env::current_exe() {
-                let _ = file_association::register_association(&exe_path.to_string_lossy());
-            }
-        }
-
+        
         event_loop.run(move |event, _, control_flow| {
             *control_flow = ControlFlow::Wait;
 
             match event {
                 Event::UserEvent(app_event) => match app_event {
                     AppEvent::FrontendReady => {
+                        // Apply theme
+                        let theme_script = format!(
+                            "window.__feather_set_theme({})",
+                            serde_json::to_string(&self.config.theme).unwrap()
+                        );
+                        let _ = webview.evaluate_script(&theme_script);
+
+                        // Apply zoom
+                        let zoom_script = format!(
+                            "window.__feather_set_zoom({})",
+                            serde_json::to_string(&self.config.zoom_level).unwrap()
+                        );
+                        let _ = webview.evaluate_script(&zoom_script);
+
+                        // Load initial file
                         if let Some(path) = current_file.lock().unwrap().as_ref() {
                             if let Ok(content) = read_file_with_encoding(path) {
                                 let path_str = path.to_string_lossy().to_string();
@@ -175,6 +179,8 @@ impl App {
                     ..
                 } => {
                     let size = window.inner_size();
+                    let is_maximized = window.is_maximized();
+                    
                     if let Ok(pos) = window.outer_position() {
                         let mut config = Config::load();
                         config.update_window_state(WindowState {
@@ -182,6 +188,7 @@ impl App {
                             height: size.height as f64,
                             x: pos.x as f64,
                             y: pos.y as f64,
+                            is_maximized,
                         });
                     }
                     *control_flow = ControlFlow::Exit;
@@ -225,6 +232,12 @@ fn handle_ipc(message: &str, event_loop_proxy: &EventLoopProxy<AppEvent>) {
             if let Some(theme) = msg["theme"].as_str() {
                 let mut config = Config::load();
                 config.update_theme(theme);
+            }
+        }
+        "zoom-changed" => {
+            if let Some(level) = msg["level"].as_u64() {
+                let mut config = Config::load();
+                config.update_zoom_level(level as u8);
             }
         }
         "open-file" => {

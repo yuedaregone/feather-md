@@ -150,6 +150,7 @@
   function setZoom(level) {
     zoomLevel = Math.max(0, Math.min(6, level));
     document.body.style.fontSize = ZOOM_SIZES[zoomLevel] + 'px';
+    sendToRust({ type: 'zoom-changed', level: zoomLevel });
   }
 
   function zoomIn() { setZoom(zoomLevel + 1); }
@@ -296,6 +297,8 @@
   window.__feather_set_theme = function (theme) {
     setTheme(theme);
   };
+
+  window.__feather_set_zoom = setZoom;
 
   window.__feather_refresh = function (content) {
     renderMarkdown(content);
