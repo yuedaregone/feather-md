@@ -1,3 +1,4 @@
+use arboard::Clipboard;
 use crate::config::{Config, WindowState};
 use crate::file_association;
 use crate::file_watcher::FileWatcher;
@@ -227,6 +228,13 @@ fn handle_ipc(message: &str, event_loop_proxy: &EventLoopProxy<AppEvent>) {
     match msg_type {
         "frontend-ready" => {
             let _ = event_loop_proxy.send_event(AppEvent::FrontendReady);
+        }
+        "copy-to-clipboard" => {
+            if let Some(text) = msg["text"].as_str() {
+                if let Ok(mut clipboard) = Clipboard::new() {
+                    let _ = clipboard.set_text(text);
+                }
+            }
         }
         "theme-changed" => {
             if let Some(theme) = msg["theme"].as_str() {

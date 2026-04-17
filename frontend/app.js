@@ -40,7 +40,7 @@
       }
 
       const langLabel = language ? `<span class="code-lang">${escapeHtml(language)}</span>` : '';
-      return `<div class="code-block-wrapper">${langLabel}<pre><code class="hljs language-${escapeHtml(language || '')}">${highlighted}</code></pre><button class="copy-btn" onclick="window.__feather_copy_code(this)">复制</button></div>`;
+      return `<div class="code-block-wrapper">${langLabel}<pre><code class="hljs language-${escapeHtml(language || '')}">${highlighted}</code></pre><button class="copy-btn">复制</button></div>`;
     };
 
     // Custom image rendering - resolve relative paths via custom protocol
@@ -163,6 +163,14 @@
     e.preventDefault();
     const menu = document.getElementById('context-menu');
 
+    // Dynamically enable/disable menu items
+    const selectedText = window.getSelection().toString();
+    const copyItem = menu.querySelector('[data-action="copy"]');
+    const copyMdItem = menu.querySelector('[data-action="copy-md"]');
+
+    if (copyItem) copyItem.classList.toggle('disabled', !selectedText);
+    if (copyMdItem) copyMdItem.classList.toggle('disabled', !rawMarkdown);
+
     // Make menu visible but hidden to measure its dimensions
     menu.style.visibility = 'hidden';
     menu.classList.remove('hidden');
@@ -195,12 +203,16 @@
   }
 
   function handleMenuAction(action, data) {
+    const item = document.querySelector(`.menu-item[data-action="${action}"]`);
+    if (item && item.classList.contains('disabled')) return;
+
     switch (action) {
       case 'copy':
-        document.execCommand('copy');
+        const selectedText = window.getSelection().toString();
+        if (selectedText) copyToClipboard(selectedText);
         break;
       case 'copy-md':
-        copyToClipboard(rawMarkdown);
+        if (rawMarkdown) copyToClipboard(rawMarkdown);
         break;
       case 'theme':
         setTheme(data);
@@ -314,7 +326,7 @@
     hideError();
     currentFilePath = filePath || '';
     renderMarkdown(content);
-    document.title = (filePath ? filePath.split(/[\\/]/).pop() : 'Untitled') + ' - FeatherMD';
+    document.title = (filePath ? filePath.split(/[\/]/).pop() : 'Untitled') + ' - FeatherMD';
   };
 
   window.__feather_set_theme = function (theme) {
@@ -353,30 +365,35 @@
   }
 
   function copyToClipboard(text) {
-    navigator.clipboard.writeText(text).catch(function () {
-      // Fallback
-      const ta = document.createElement('textarea');
-      ta.value = text;
-      ta.style.position = 'fixed';
-      ta.style.left = '-9999px';
-      document.body.appendChild(ta);
-      ta.select();
-      document.execCommand('copy');
-      document.body.removeChild(ta);
-    });
+    sendToRust({ type: 'copy-to-clipboard', text: text });
   }
 
   // ---- Event Listeners ----
 
   document.addEventListener('contextmenu', showContextMenu);
   document.addEventListener('click', function (e) {
-    // Handle context menu clicks
+    // Handle menu clicks
     if (e.target.closest('.menu-item')) {
       const item = e.target.closest('.menu-item');
       const action = item.dataset.action;
       const data = item.dataset.theme;
       if (action) handleMenuAction(action, data);
       return;
+    }
+    // Handle code copy clicks
+    if (e.target.classList.contains('copy-btn')) {
+        window.__feather_copy_code(e.target);
+        return;
+    }
+    // Handle welcome page open file click
+    if (e.target.id === 'welcome-open-file') {
+        window.__feather_open_file();
+        return;
+    }
+    // Handle error page open file click
+    if (e.target.id === 'error-retry') {
+        window.__feather_open_file();
+        return;
     }
     hideContextMenu();
   });
@@ -388,8 +405,22 @@
   // ---- Init ----
   initMarked();
 
+  const welcomeHTML = `
+    <div style="text-align:center;padding:4rem 1rem;color:var(--quote-color);">
+      <h2 style="border:none;padding:0;color:var(--text-color);">FeatherMD</h2>
+      <p>极致轻量的 Markdown 查看器</p>
+      <button
+        id="welcome-open-file"
+        style="margin-top:2rem; padding: 10px 24px; border: 1px solid var(--border-color); background: var(--bg-secondary); color: var(--text-color); border-radius: 6px; cursor: pointer; font-size: 1em;"
+      >
+        打开文件
+      </button>
+      <p style="margin-top:1.5rem;font-size:0.9em;">或将文件拖入此窗口</p>
+    </div>
+  `;
+
   // Show welcome if no file loaded
-  document.getElementById('content').innerHTML = '<div style="text-align:center;padding:4rem 1rem;color:var(--quote-color);"><h2 style="border:none;padding:0;color:var(--text-color);">FeatherMD</h2><p>极致轻量的 Markdown 查看器</p><p style="margin-top:2rem;font-size:0.9em;">双击 .md 文件打开，或将文件拖入此窗口</p></div>';
+  document.getElementById('content').innerHTML = welcomeHTML;
 
   // Let the backend know the frontend is ready
   sendToRust({ type: 'frontend-ready' });
