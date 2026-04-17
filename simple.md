@@ -1,3 +1,0 @@
-# Simple Test
-
-Hello world
