@@ -1,0 +1,46 @@
+/* ========================================
+   FeatherMD - Nord Theme
+   ======================================== */
+
+:root {
+  --bg-color: #2e3440;
+  --text-color: #d8dee9;
+  --border-color: #434c5e;
+  --link-color: #88c0d0;
+  --quote-color: #7b88a1;
+  --inline-code-bg: rgba(76, 86, 106, 0.3);
+  --table-header-bg: #3b4252;
+  --table-stripe-bg: #3b4252;
+  --code-bg: #3b4252;
+  --copy-btn-bg: rgba(255,255,255,0.05);
+  --copy-btn-color: #7b88a1;
+  --context-menu-bg: #3b4252;
+  --context-menu-border: #434c5e;
+  --context-menu-hover: #88c0d0;
+  --context-menu-hover-bg: #434c5e;
+  --error-bg: #2e3440;
+  --error-color: #d8dee9;
+}
+
+body {
+  background-color: var(--bg-color);
+  color: var(--text-color);
+}
+
+pre {
+  background-color: var(--code-bg);
+}
+
+/* Highlight.js Nord */
+.hljs { color: #d8dee9; background: var(--code-bg); }
+.hljs-comment, .hljs-quote { color: #616e88; font-style: italic; }
+.hljs-doctag, .hljs-keyword, .hljs-formula { color: #81a1c1; }
+.hljs-section, .hljs-name, .hljs-selector-tag, .hljs-deletion, .hljs-subst { color: #bf616a; }
+.hljs-literal { color: #81a1c1; }
+.hljs-string, .hljs-regexp, .hljs-addition, .hljs-attribute, .hljs-meta .hljs-string { color: #a3be8c; }
+.hljs-attr, .hljs-variable, .hljs-template-variable, .hljs-type, .hljs-selector-class, .hljs-selector-attr, .hljs-selector-pseudo, .hljs-number { color: #b48ead; }
+.hljs-symbol, .hljs-bullet, .hljs-link, .hljs-meta, .hljs-selector-id, .hljs-title { color: #88c0d0; }
+.hljs-built_in, .hljs-title.class_, .hljs-class .hljs-title { color: #ebcb8b; }
+.hljs-emphasis { font-style: italic; }
+.hljs-strong { font-weight: bold; }
+.hljs-link { text-decoration: underline; }

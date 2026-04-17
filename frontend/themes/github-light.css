@@ -1,0 +1,44 @@
+/* ========================================
+   FeatherMD - GitHub Light Theme
+   ======================================== */
+
+:root {
+  --bg-color: #ffffff;
+  --text-color: #24292e;
+  --border-color: #eaecef;
+  --link-color: #0366d6;
+  --quote-color: #6a737d;
+  --inline-code-bg: rgba(27, 31, 35, 0.05);
+  --table-header-bg: #f6f8fa;
+  --table-stripe-bg: #f6f8fa;
+  --code-bg: #f6f8fa;
+  --copy-btn-bg: rgba(0,0,0,0.05);
+  --copy-btn-color: #586069;
+  --context-menu-bg: #ffffff;
+  --context-menu-border: #e1e4e8;
+  --context-menu-hover: #0366d6;
+  --context-menu-hover-bg: #f1f8ff;
+  --error-bg: #ffffff;
+  --error-color: #24292e;
+}
+
+body {
+  background-color: var(--bg-color);
+  color: var(--text-color);
+}
+
+pre {
+  background-color: var(--code-bg);
+}
+
+/* Highlight.js GitHub Light */
+.hljs { color: #24292e; background: var(--code-bg); }
+.hljs-comment, .hljs-quote { color: #6a737d; }
+.hljs-keyword, .hljs-selector-tag, .hljs-addition { color: #d73a49; }
+.hljs-number, .hljs-string, .hljs-meta .hljs-meta-string, .hljs-literal, .hljs-doctag, .hljs-regexp { color: #032f62; }
+.hljs-title, .hljs-section, .hljs-name, .hljs-selector-id, .hljs-selector-class { color: #6f42c1; }
+.hljs-attribute, .hljs-attr, .hljs-variable, .hljs-template-variable, .hljs-class .hljs-title, .hljs-type { color: #e36209; }
+.hljs-symbol, .hljs-bullet, .hljs-subst, .hljs-meta, .hljs-meta .hljs-keyword, .hljs-selector-attr, .hljs-selector-pseudo, .hljs-link { color: #005cc5; }
+.hljs-built_in, .hljs-deletion { color: #22863a; }
+.hljs-params { color: #24292e; }
+.hljs-formula { background-color: #f6f8fa; }
