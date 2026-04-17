@@ -22,6 +22,7 @@ use wry::{
 pub enum AppEvent {
     FileChanged,
     OpenFile(PathBuf),
+    FrontendReady,
 }
 
 pub struct App {
@@ -92,25 +93,6 @@ impl App {
         
         let webview = Arc::new(webview);
 
-        if let Some(ref path) = file_path {
-            if let Ok(content) = read_file_with_encoding(path) {
-                let path_str = path.to_string_lossy().to_string();
-                let script = format!(
-                    "window.__feather_render({}, {})",
-                    serde_json::to_string(&content).unwrap(),
-                    serde_json::to_string(&path_str).unwrap()
-                );
-                let _ = webview.evaluate_script(&script);
-            } else {
-                let path_str = path.to_string_lossy().to_string();
-                let script = format!(
-                    "window.__feather_error('无法打开文件', '文件不存在或无法读取: {}')",
-                    serde_json::to_string(&path_str).unwrap()
-                );
-                let _ = webview.evaluate_script(&script);
-            }
-        }
-
         let theme_script = format!(
             "window.__feather_set_theme({})",
             serde_json::to_string(&self.config.theme).unwrap()
@@ -128,6 +110,26 @@ impl App {
 
             match event {
                 Event::UserEvent(app_event) => match app_event {
+                    AppEvent::FrontendReady => {
+                        if let Some(path) = current_file.lock().unwrap().as_ref() {
+                            if let Ok(content) = read_file_with_encoding(path) {
+                                let path_str = path.to_string_lossy().to_string();
+                                let script = format!(
+                                    "window.__feather_render({}, {})",
+                                    serde_json::to_string(&content).unwrap(),
+                                    serde_json::to_string(&path_str).unwrap()
+                                );
+                                let _ = webview.evaluate_script(&script);
+                            } else {
+                                let path_str = path.to_string_lossy().to_string();
+                                let script = format!(
+                                    "window.__feather_error('无法打开文件', '文件不存在或无法读取: {}')",
+                                    serde_json::to_string(&path_str).unwrap()
+                                );
+                                let _ = webview.evaluate_script(&script);
+                            }
+                        }
+                    }
                     AppEvent::FileChanged => {
                         let file_path_lock = current_file.lock().unwrap();
                         if let Some(ref path) = *file_path_lock {
@@ -205,6 +207,9 @@ fn handle_ipc(message: &str, event_loop_proxy: &EventLoopProxy<AppEvent>) {
     let msg_type = msg["type"].as_str().unwrap_or("");
 
     match msg_type {
+        "frontend-ready" => {
+            let _ = event_loop_proxy.send_event(AppEvent::FrontendReady);
+        }
         "theme-changed" => {
             if let Some(theme) = msg["theme"].as_str() {
                 let mut config = Config::load();

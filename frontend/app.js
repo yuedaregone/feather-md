@@ -365,4 +365,7 @@
   // Show welcome if no file loaded
   document.getElementById('content').innerHTML = '<div style="text-align:center;padding:4rem 1rem;color:var(--quote-color);"><h2 style="border:none;padding:0;color:var(--text-color);">FeatherMD</h2><p>极致轻量的 Markdown 查看器</p><p style="margin-top:2rem;font-size:0.9em;">双击 .md 文件打开，或将文件拖入此窗口</p></div>';
 
+  // Let the backend know the frontend is ready
+  sendToRust({ type: 'frontend-ready' });
+
 })();
